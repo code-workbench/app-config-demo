@@ -1,141 +1,203 @@
-# Azure App Configuration Demo Infrastructure
+# App Configuration Demo
 
-This Terraform configuration deploys an Azure infrastructure stack with:
+The following repo contains everything required to showcase how to use an Azure Web App, integrating with Azure App Configuration Service and Key Vault to do configuration management for an application.
 
-- **App Service** (Linux) with managed identity
-- **Container Registry** for container images
-- **App Configuration Service** for centralized configuration
-- **Key Vault** for secrets management
-- **Managed Identities** and **Role Assignments** for secure access
+## 🚀 Features
 
-## Architecture
+### Pre-installed Tools
+- **Azure CLI** - For Azure resource management
+- **Azure Developer CLI (azd)** - For modern Azure development workflows
+- **Terraform** - For infrastructure as code
+- **Docker** - For containerization
+- **.NET SDK** (6.0, 7.0, 8.0) - For .NET development
 
-The infrastructure implements the following security patterns:
+### VS Code Extensions
+- HashiCorp Terraform
+- Azure Terraform
+- Azure Resource Groups
+- Azure App Service
+- Azure Container Apps
+- Docker
+- .NET and C# support
+- Python support
+- GitHub Copilot
+- Azure CLI Tools
+- Bicep
 
-1. **App Service** uses a user-assigned managed identity to:
-   - Read configuration from App Configuration Service
-   - Pull container images from Container Registry
+## 📁 Directory Structure
 
-2. **App Configuration Service** uses a user-assigned managed identity to:
-   - Read secrets from Key Vault (for configuration values that reference secrets)
-
-3. **Role Assignments** ensure least-privilege access:
-   - App Service → App Configuration: `App Configuration Data Reader`
-   - App Service → Container Registry: `AcrPull`
-   - App Configuration → Key Vault: `Key Vault Secrets User`
-
-## Prerequisites
-
-- Azure CLI installed and logged in
-- Terraform installed (use `winget install HashiCorp.Terraform` on Windows)
-- Appropriate Azure subscription permissions
-
-## Deployment
-
-1. **Clone and navigate to the repository**:
-   ```bash
-   cd /home/kemack/github-projects/app-config-demo-infra
-   ```
-
-2. **Initialize Terraform**:
-   ```bash
-   terraform init
-   ```
-
-3. **Create a terraform.tfvars file** (optional):
-   ```bash
-   cp terraform.tfvars.example terraform.tfvars
-   # Edit terraform.tfvars with your desired values
-   ```
-
-4. **Validate the configuration**:
-   ```bash
-   terraform validate
-   ```
-
-5. **Plan the deployment**:
-   ```bash
-   terraform plan
-   ```
-
-6. **Apply the configuration**:
-   ```bash
-   terraform apply -auto-approve
-   ```
-
-## Configuration
-
-### Variables
-
-| Variable | Description | Default | Required |
-|----------|-------------|---------|----------|
-| `resource_group_name` | Name of the resource group | `rg-app-config-demo` | No |
-| `location` | Azure region | `East US` | No |
-| `prefix` | Prefix for resource names | `appconfigdemo` | No |
-| `tags` | Tags to apply to resources | See variables.tf | No |
-
-### Example Usage
-
-The deployed App Service can access configuration using the Azure App Configuration SDK:
-
-```csharp
-// Example C# code for accessing App Configuration
-var builder = WebApplication.CreateBuilder(args);
-
-// Add Azure App Configuration
-builder.Configuration.AddAzureAppConfiguration(options =>
-{
-    options.Connect(new Uri(Environment.GetEnvironmentVariable("AZURE_APP_CONFIG_ENDPOINT")),
-                    new DefaultAzureCredential())
-           .ConfigureKeyVault(kv =>
-           {
-               kv.SetCredential(new DefaultAzureCredential());
-           });
-});
+```
+├── README.md
+├── app  # Provides a containerized application that shows the app config settings.  
+│   ├── AppConfigDemo.csproj
+│   ├── Dockerfile
+│   ├── Program.cs
+│   ├── README.md
+│   ├── docker-compose.yml
+│   ├── obj
+│   │   ├── AppConfigDemo.csproj.nuget.dgspec.json
+│   │   ├── AppConfigDemo.csproj.nuget.g.props
+│   │   ├── AppConfigDemo.csproj.nuget.g.targets
+│   │   ├── project.assets.json
+│   │   └── project.nuget.cache
+│   ├── run.sh
+│   └── test-local.sh
+└── infra # Provides infrastructure-as-code to support deploying the infrastructure.  
+    ├── README.md
+    ├── main.tf
+    ├── outputs.tf
+    ├── terraform.tfstate
+    ├── terraform.tfstate.backup
+    ├── terraform.tfvars.example
+    └── variables.tf
 ```
 
-## Resources Created
+## 🛠️ Getting Started
 
-- Resource Group
-- User-Assigned Managed Identities (2)
-- App Service Plan (Linux, B1)
-- App Service (Linux Web App)
-- Container Registry (Basic SKU)
-- App Configuration Service (Free tier)
-- Key Vault (Standard SKU)
-- Role Assignments for secure access
-- Sample configuration key-value pairs
-- Sample Key Vault secret
+### 1. Open in DevContainer
 
-## Security Features
+1. Open the project in VS Code
+2. Install the "Dev Containers" extension if not already installed
+3. Press `F1` and select "Dev Containers: Reopen in Container"
+4. Wait for the container to build and initialize
 
-- **No admin accounts enabled** on Container Registry
-- **RBAC-based access** to Key Vault (no access policies)
-- **Managed identities** for all service-to-service authentication
-- **Least privilege** role assignments
-- **Key Vault references** in App Configuration for sensitive values
-
-## Clean Up
-
-To destroy the infrastructure:
+### 2. Authenticate with Azure
 
 ```bash
-terraform destroy
+# Connect to azure government
+az cloud set --name AzureUSGovernment
+
+# Login to Azure
+az login --use-device-code
+
+# Verify your account
+az account show
+
+# Set subscription if needed
+az account set --subscription "your-subscription-id"
 ```
 
-## Outputs
+### 3. Create a tfvars file
 
-After deployment, Terraform will output important information including:
+You can go to the "./infra" directory and find an example of a tfvar file named "terraform.tfvars.example":
 
-- App Service URL
-- Container Registry login server
-- App Configuration endpoint
-- Key Vault URI
-- Managed identity client IDs
+Create a copy of this file and update to have the appropriate values for your environment.  
 
-## Next Steps
+### 4. Deploy Infrastructure
 
-1. **Deploy your application container** to the Container Registry
-2. **Configure the App Service** to use your container image
-3. **Add configuration values** to App Configuration Service
-4. **Store secrets** in Key Vault and reference them from App Configuration
+```bash
+# Navigate to the infra directory:
+cd ./infra
+
+# Initialize Terraform
+terraform init
+
+# Plan deployment
+terraform plan -var-file={path to tfvars}
+
+# Apply infrastructure
+terraform apply -var-file={path to tfvars}
+```
+
+### 5. Build and Deploy Your App
+
+```bash
+# Navigate to app directory
+cd app
+
+# Build container image
+docker build -t settings-app:latest .
+
+# Test locally
+docker run -p 8080:80 myapp
+
+# Tag for ACR (replace with your ACR name from terraform output)
+docker tag myapp <acr-name>.azurecr.io/myapp:latest
+
+# Push to ACR
+docker push <acr-name>.azurecr.io/myapp:latest
+```
+
+## 🔧 VS Code Tasks
+
+The devcontainer includes pre-configured tasks accessible via `Ctrl+Shift+P` → "Tasks: Run Task":
+
+### Terraform Tasks
+- **Terraform: Init** - Initialize Terraform
+- **Terraform: Validate** - Validate configuration
+- **Terraform: Plan** - Plan deployment
+- **Terraform: Apply** - Apply infrastructure
+- **Terraform: Destroy** - Destroy infrastructure
+- **Terraform: Format** - Format code
+
+### Docker Tasks
+- **Docker: Build App** - Build container image
+- **Docker: Run App Locally** - Run container locally
+
+### Azure Tasks
+- **Azure: Login** - Login to Azure
+- **Azure: Show Account** - Show current account
+
+### Combined Tasks
+- **Build and Deploy: Full Pipeline** - Complete build and deployment
+
+## 🐛 Debugging
+
+### .NET Application Debugging
+1. Set breakpoints in your .NET code
+2. Use the "Debug .NET App (Local)" configuration
+3. Or attach to a running container with "Attach to .NET App in Container"
+
+### Container Debugging
+1. Build and run your container locally
+2. Use `docker exec -it <container-name> /bin/bash` to access the container
+3. Check logs with `docker logs <container-name>`
+
+## 🌐 Port Forwarding
+
+The devcontainer automatically forwards these ports:
+- **3000** - Frontend development server
+- **5000** - .NET app (HTTP)
+- **5001** - .NET app (HTTPS)
+- **8080** - Container app
+- **8081** - Additional container port
+
+## 📝 Development Workflow
+
+1. **Edit Infrastructure**: Modify `.tf` files for infrastructure changes
+2. **Plan Changes**: Run `terraform plan` to see what will change
+3. **Apply Changes**: Run `terraform apply` to update infrastructure
+4. **Develop App**: Work in the `app/` directory
+5. **Build Container**: Use Docker tasks to build and test
+6. **Deploy**: Push to ACR and update App Service
+
+## 🔐 Security Notes
+
+- The devcontainer runs as the `vscode` user for security
+- Docker socket is mounted for container operations
+- All Azure authentication uses your personal credentials
+- Terraform state is stored locally (consider remote state for production)
+
+## 📚 Additional Resources
+
+- [Azure DevContainer Images](https://github.com/devcontainers/images)
+- [Terraform Documentation](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs)
+- [Azure App Configuration](https://docs.microsoft.com/azure/azure-app-configuration/)
+- [Azure Key Vault](https://docs.microsoft.com/azure/key-vault/)
+
+## 🆘 Troubleshooting
+
+### Container Won't Start
+- Check Docker is running on your host
+- Verify you have sufficient disk space
+- Check the devcontainer logs in VS Code
+
+### Terraform Issues
+- Ensure you're logged into Azure: `az login`
+- Check your subscription: `az account show`
+- Verify permissions on the subscription
+
+### Azure Authentication
+- Try `az login --use-device-code` for authentication issues
+- Clear credentials: `az logout` then `az login`
+- Check tenant: `az account tenant list`

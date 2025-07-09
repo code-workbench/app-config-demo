@@ -1,0 +1,30 @@
+# Docker Compose file for local development
+version: '3.8'
+
+services:
+  app:
+    build: 
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - AZURE_APP_CONFIG_ENDPOINT=${AZURE_APP_CONFIG_ENDPOINT}
+      - AZURE_CLIENT_ID=${AZURE_CLIENT_ID}
+    volumes:
+      - ./app:/workspace/app
+    networks:
+      - app-network
+
+  # Local Redis for development (optional)
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge

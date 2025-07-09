@@ -1,0 +1,94 @@
+{
+  "name": "Azure App Config Demo",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+  "features": {
+    "ghcr.io/devcontainers/features/azure-cli:1": {
+      "version": "latest",
+      "extensions": "account,containerapp"
+    },
+    "ghcr.io/devcontainers/features/terraform:1": {
+      "version": "latest",
+      "tflint": true,
+      "terragrunt": false
+    },
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {
+      "version": "latest",
+      "enableNonRootDocker": "true",
+      "moby": "true"
+    },
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "8.0",
+      "additionalVersions": "6.0,7.0"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "hashicorp.terraform",
+        "ms-azuretools.vscode-azureterraform",
+        "ms-azuretools.vscode-azureresourcegroups",
+        "ms-azuretools.vscode-azureappservice",
+        "ms-azuretools.vscode-azurecontainerapps",
+        "ms-azuretools.vscode-docker",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "ms-dotnettools.csharp",
+        "ms-vscode.vscode-json",
+        "redhat.vscode-yaml",
+        "ms-vscode.powershell",
+        "github.copilot",
+        "github.copilot-chat",
+        "ms-vscode.azurecli",
+        "ms-azuretools.vscode-bicep"
+      ],
+      "settings": {
+        "terraform.experimentalFeatures.validateOnSave": true,
+        "terraform.languageServer.enable": true,
+        "files.associations": {
+          "*.tf": "terraform",
+          "*.tfvars": "terraform",
+          "*.hcl": "terraform"
+        },
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll": "explicit"
+        },
+        "terminal.integrated.defaultProfile.linux": "bash",
+        "python.defaultInterpreterPath": "/usr/local/bin/python",
+        "dotnet.defaultSolution": "app/**/*.sln"
+      }
+    }
+  },
+  "forwardPorts": [
+    3000,
+    5000,
+    5001,
+    8080,
+    8081
+  ],
+  "portsAttributes": {
+    "3000": {
+      "label": "Frontend Dev Server",
+      "onAutoForward": "notify"
+    },
+    "5000": {
+      "label": ".NET App (HTTP)",
+      "onAutoForward": "notify"
+    },
+    "5001": {
+      "label": ".NET App (HTTPS)",
+      "onAutoForward": "notify"
+    },
+    "8080": {
+      "label": "Container App",
+      "onAutoForward": "notify"
+    }
+  },
+  "postCreateCommand": ".devcontainer/post-create.sh",
+  "postStartCommand": ".devcontainer/post-start.sh",
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ],
+  "remoteUser": "vscode",
+  "workspaceFolder": "/workspace",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind"
+}

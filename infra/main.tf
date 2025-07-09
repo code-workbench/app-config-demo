@@ -62,7 +62,7 @@ resource "azurerm_key_vault" "main" {
 
   # Enable RBAC authorization instead of access policies
   enable_rbac_authorization = true
-  
+
   # Security settings
   purge_protection_enabled   = false
   soft_delete_retention_days = 7
@@ -131,20 +131,20 @@ resource "azurerm_linux_web_app" "main" {
   site_config {
     # Configure for container deployment
     always_on = false
-    
+
     application_stack {
-      docker_image_name   = "nginx:latest"
-      docker_registry_url = "https://index.docker.io"
+      docker_image_name   = "${azurerm_container_registry.main.login_server}/settings-app:latest"
+      docker_registry_url = "https://${azurerm_container_registry.main.login_server}"
     }
   }
 
   # App settings for App Configuration connection
   app_settings = {
-    "AZURE_APP_CONFIG_ENDPOINT"      = azurerm_app_configuration.main.endpoint
-    "AZURE_CLIENT_ID"                = azurerm_user_assigned_identity.app_service.client_id
+    "AZURE_APP_CONFIG_ENDPOINT"           = azurerm_app_configuration.main.endpoint
+    "AZURE_CLIENT_ID"                     = azurerm_user_assigned_identity.app_service.client_id
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
-    "TEST_KEY"                       = "@Microsoft.AppConfiguration(Endpoint=${azurerm_app_configuration.main.endpoint}; Key=TEST_KEY)"
-    "TEST_SECRET"                    = "@Microsoft.AppConfiguration(Endpoint=${azurerm_app_configuration.main.endpoint}; Key=TEST_SECRET)"
+    "TEST_KEY"                            = "@Microsoft.AppConfiguration(Endpoint=${azurerm_app_configuration.main.endpoint}; Key=TEST_KEY)"
+    "TEST_SECRET"                         = "@Microsoft.AppConfiguration(Endpoint=${azurerm_app_configuration.main.endpoint}; Key=TEST_SECRET)"
   }
 
   tags = var.tags
