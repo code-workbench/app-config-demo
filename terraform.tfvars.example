@@ -1,0 +1,13 @@
+# Example terraform.tfvars file
+# Copy this to terraform.tfvars and customize as needed
+
+resource_group_name = "rg-app-config-demo"
+location           = "usgovvirginia"
+prefix             = "appconfigdemo"
+
+tags = {
+  Environment = "Development"
+  Project     = "App Config Demo"
+  ManagedBy   = "Terraform"
+  Owner       = "Your Name"
+}
