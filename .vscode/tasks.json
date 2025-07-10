@@ -128,7 +128,7 @@
         "build",
         "-t",
         "app-config-demo",
-        "./app"
+        "."
       ],
       "options": {
         "cwd": "${workspaceFolder}/app"
@@ -208,22 +208,6 @@
         "Terraform: Plan",
         "Docker: Build App"
       ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": false,
-        "panel": "shared"
-      }
-    },
-    {
-      "label": "Docker: Tag and Push to ACR",
-      "type": "shell",
-      "command": "bash",
-      "args": [
-        "-c",
-        "echo 'Enter the ACR registry name (e.g., myregistry.azurecr.io):' && read ACR_REGISTRY && echo 'Enter the image tag (e.g., v1.0.0 or latest):' && read IMAGE_TAG && echo 'Tagging image for ACR...' && docker tag app-config-demo $ACR_REGISTRY/app-config-demo:$IMAGE_TAG && echo 'Logging into Azure Container Registry...' && az acr login --name ${ACR_REGISTRY%.*} && echo 'Pushing image to ACR...' && docker push $ACR_REGISTRY/app-config-demo:$IMAGE_TAG && echo 'Image successfully pushed to $ACR_REGISTRY/app-config-demo:$IMAGE_TAG'"
-      ],
       "options": {
         "cwd": "${workspaceFolder}"
       },
@@ -231,23 +215,7 @@
       "presentation": {
         "echo": true,
         "reveal": "always",
-        "focus": true,
-        "panel": "shared"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Docker: Build and Push to ACR (Full Pipeline)",
-      "dependsOrder": "sequence",
-      "dependsOn": [
-        "Docker: Build App",
-        "Docker: Tag and Push to ACR"
-      ],
-      "group": "build",
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "focus": true,
+        "focus": false,
         "panel": "shared"
       }
     }

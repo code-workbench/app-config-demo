@@ -27,6 +27,11 @@ sudo apt-get install -y helm
 dotnet tool install --global dotnet-ef
 dotnet tool install --global Microsoft.Web.LibraryManager.Cli
 
+# Fix Docker permissions for the vscode user
+echo "🐳 Setting up Docker permissions..."
+sudo usermod -aG docker vscode
+sudo chmod 666 /var/run/docker.sock
+
 # Create app directory if it doesn't exist
 mkdir -p /workspace/app
 

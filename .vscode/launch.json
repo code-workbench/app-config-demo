@@ -25,7 +25,7 @@
       "name": "Debug .NET App (Local)",
       "type": "coreclr",
       "request": "launch",
-      "program": "${workspaceFolder}/app/bin/Debug/net8.0/app.dll",
+      "program": "${workspaceFolder}/app/bin/Debug/net8.0/AppConfigDemo.dll",
       "args": [],
       "cwd": "${workspaceFolder}/app",
       "stopAtEntry": false,

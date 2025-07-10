@@ -14,7 +14,7 @@ variable "prefix" {
   description = "Prefix for resource names"
   type        = string
   default     = "appconfigdemo"
-  
+
   validation {
     condition     = length(var.prefix) <= 15 && can(regex("^[a-z0-9]+$", var.prefix))
     error_message = "Prefix must be 15 characters or less and contain only lowercase letters and numbers."

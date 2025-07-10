@@ -42,23 +42,3 @@ output "key_vault_name" {
   description = "Name of the Key Vault"
   value       = azurerm_key_vault.main.name
 }
-
-output "app_service_managed_identity_client_id" {
-  description = "Client ID of the App Service managed identity"
-  value       = azurerm_user_assigned_identity.app_service.client_id
-}
-
-output "app_service_managed_identity_principal_id" {
-  description = "Principal ID of the App Service managed identity"
-  value       = azurerm_user_assigned_identity.app_service.principal_id
-}
-
-output "app_config_managed_identity_client_id" {
-  description = "Client ID of the App Configuration managed identity"
-  value       = azurerm_user_assigned_identity.app_config.client_id
-}
-
-output "app_config_managed_identity_principal_id" {
-  description = "Principal ID of the App Configuration managed identity"
-  value       = azurerm_user_assigned_identity.app_config.principal_id
-}
