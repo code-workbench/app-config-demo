@@ -212,14 +212,3 @@ resource "azurerm_app_configuration_key" "test_secret_reference" {
 
   tags = var.tags
 }
-
-# App Configuration Key-Value that references Key Vault secret
-resource "azurerm_app_configuration_key" "keyvault_reference" {
-  configuration_store_id = azurerm_app_configuration.main.id
-  key                    = "app:database:connectionstring"
-  type                   = "vault"
-  vault_key_reference    = azurerm_key_vault_secret.test_secret.versionless_id
-  label                  = "production"
-
-  tags = var.tags
-}
