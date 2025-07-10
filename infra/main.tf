@@ -83,6 +83,7 @@ resource "azurerm_app_configuration" "main" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   sku                 = "standard"
+  local_auth_enabled  = false # Disable local authentication
 
   # Assign the system-assigned managed identity to App Configuration
   identity {
@@ -163,6 +164,13 @@ resource "azurerm_role_assignment" "app_config_to_keyvault" {
   scope                = azurerm_key_vault.main.id
   role_definition_name = "Key Vault Secrets User"
   principal_id         = azurerm_app_configuration.main.identity[0].principal_id
+}
+
+# App Service identity can read secrets from Key Vault
+resource "azurerm_role_assignment" "app_service_to_keyvault" {
+  scope                = azurerm_key_vault.main.id
+  role_definition_name = "Key Vault Secrets User"
+  principal_id         = azurerm_linux_web_app.main.identity[0].principal_id
 }
 
 # Current user/service principal access to Key Vault (for management)
