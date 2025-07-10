@@ -182,6 +182,13 @@ resource "azurerm_role_assignment" "current_user_to_keyvault" {
   principal_id         = data.azurerm_client_config.current.object_id
 }
 
+# Current user/service principal access to App Configuration (for management)
+resource "azurerm_role_assignment" "current_user_to_app_config" {
+  scope                = azurerm_app_configuration.main.id
+  role_definition_name = "App Configuration Data Owner"
+  principal_id         = data.azurerm_client_config.current.object_id
+}
+
 
 # TEST_SECRET Key Vault Secret
 resource "azurerm_key_vault_secret" "test_secret" {
@@ -200,6 +207,8 @@ resource "azurerm_app_configuration_key" "test_key" {
   key                    = "TEST_KEY"
   value                  = "This is a test key in the app config"
 
+  depends_on = [azurerm_role_assignment.current_user_to_app_config]
+
   tags = var.tags
 }
 
@@ -209,6 +218,11 @@ resource "azurerm_app_configuration_key" "test_secret_reference" {
   key                    = "TEST_SECRET"
   type                   = "vault"
   vault_key_reference    = azurerm_key_vault_secret.test_secret.versionless_id
+
+  depends_on = [
+    azurerm_role_assignment.current_user_to_app_config,
+    azurerm_role_assignment.app_config_to_keyvault
+  ]
 
   tags = var.tags
 }
