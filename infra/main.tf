@@ -34,23 +34,7 @@ resource "azurerm_resource_group" "main" {
   tags = var.tags
 }
 
-# User Assigned Managed Identity for App Service
-resource "azurerm_user_assigned_identity" "app_service" {
-  name                = "${var.prefix}-app-identity"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
 
-  tags = var.tags
-}
-
-# User Assigned Managed Identity for App Configuration
-resource "azurerm_user_assigned_identity" "app_config" {
-  name                = "${var.prefix}-config-identity"
-  location            = azurerm_resource_group.main.location
-  resource_group_name = azurerm_resource_group.main.name
-
-  tags = var.tags
-}
 
 # Key Vault
 resource "azurerm_key_vault" "main" {
@@ -82,8 +66,13 @@ resource "azurerm_container_registry" "main" {
   name                = "${var.prefix}acr${random_string.suffix.result}"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-  sku                 = "Basic"
+  sku                 = "Standard"
   admin_enabled       = false
+
+  # Assign the system-assigned managed identity to Container Registry
+  identity {
+    type = "SystemAssigned"
+  }
 
   tags = var.tags
 }
@@ -93,12 +82,11 @@ resource "azurerm_app_configuration" "main" {
   name                = "${var.prefix}-appconfig-${random_string.suffix.result}"
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
-  sku                 = "free"
+  sku                 = "standard"
 
-  # Assign the managed identity to App Configuration
+  # Assign the system-assigned managed identity to App Configuration
   identity {
-    type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.app_config.id]
+    type = "SystemAssigned"
   }
 
   tags = var.tags
@@ -110,7 +98,7 @@ resource "azurerm_service_plan" "main" {
   resource_group_name = azurerm_resource_group.main.name
   location            = azurerm_resource_group.main.location
   os_type             = "Linux"
-  sku_name            = "B1"
+  sku_name            = "P0v3"
 
   tags = var.tags
 }
@@ -122,18 +110,21 @@ resource "azurerm_linux_web_app" "main" {
   location            = azurerm_service_plan.main.location
   service_plan_id     = azurerm_service_plan.main.id
 
-  # Assign the managed identity to App Service
+  # Assign the system-assigned managed identity to App Service
   identity {
-    type         = "UserAssigned"
-    identity_ids = [azurerm_user_assigned_identity.app_service.id]
+    type = "SystemAssigned"
   }
 
   site_config {
     # Configure for container deployment
     always_on = false
 
+    container_registry_use_managed_identity = true
+
+    app_command_line = "dotnet AppConfigDemo.dll --urls http://+:80"
+
     application_stack {
-      docker_image_name   = "${azurerm_container_registry.main.login_server}/settings-app:latest"
+      docker_image_name   = "app-config-demo:latest"
       docker_registry_url = "https://${azurerm_container_registry.main.login_server}"
     }
   }
@@ -141,10 +132,9 @@ resource "azurerm_linux_web_app" "main" {
   # App settings for App Configuration connection
   app_settings = {
     "AZURE_APP_CONFIG_ENDPOINT"           = azurerm_app_configuration.main.endpoint
-    "AZURE_CLIENT_ID"                     = azurerm_user_assigned_identity.app_service.client_id
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
-    "TEST_KEY"                            = "@Microsoft.AppConfiguration(Endpoint=${azurerm_app_configuration.main.endpoint}; Key=TEST_KEY)"
-    "TEST_SECRET"                         = "@Microsoft.AppConfiguration(Endpoint=${azurerm_app_configuration.main.endpoint}; Key=TEST_SECRET)"
+    "TEST_SETTING"                        = "@Microsoft.AppConfiguration(Endpoint=${azurerm_app_configuration.main.endpoint};Key=TEST_KEY)"
+    "TEST_SECRET"                         = "@Microsoft.AppConfiguration(Endpoint=${azurerm_app_configuration.main.endpoint};Key=TEST_SECRET)"
     "DOCKER_REGISTRY_SERVER_URL"          = "https://${azurerm_container_registry.main.login_server}"
     "DOCKER_ENABLE_CI"                    = "true"
   }
@@ -158,21 +148,21 @@ resource "azurerm_linux_web_app" "main" {
 resource "azurerm_role_assignment" "app_service_to_app_config" {
   scope                = azurerm_app_configuration.main.id
   role_definition_name = "App Configuration Data Reader"
-  principal_id         = azurerm_user_assigned_identity.app_service.principal_id
+  principal_id         = azurerm_linux_web_app.main.identity[0].principal_id
 }
 
 # App Service identity can pull from Container Registry
 resource "azurerm_role_assignment" "app_service_to_acr" {
   scope                = azurerm_container_registry.main.id
   role_definition_name = "AcrPull"
-  principal_id         = azurerm_user_assigned_identity.app_service.principal_id
+  principal_id         = azurerm_linux_web_app.main.identity[0].principal_id
 }
 
 # App Configuration identity can read secrets from Key Vault
 resource "azurerm_role_assignment" "app_config_to_keyvault" {
   scope                = azurerm_key_vault.main.id
   role_definition_name = "Key Vault Secrets User"
-  principal_id         = azurerm_user_assigned_identity.app_config.principal_id
+  principal_id         = azurerm_app_configuration.main.identity[0].principal_id
 }
 
 # Current user/service principal access to Key Vault (for management)
