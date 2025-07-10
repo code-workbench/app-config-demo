@@ -145,6 +145,8 @@ resource "azurerm_linux_web_app" "main" {
     "WEBSITES_ENABLE_APP_SERVICE_STORAGE" = "false"
     "TEST_KEY"                            = "@Microsoft.AppConfiguration(Endpoint=${azurerm_app_configuration.main.endpoint}; Key=TEST_KEY)"
     "TEST_SECRET"                         = "@Microsoft.AppConfiguration(Endpoint=${azurerm_app_configuration.main.endpoint}; Key=TEST_SECRET)"
+    "DOCKER_REGISTRY_SERVER_URL"          = "https://${azurerm_container_registry.main.login_server}"
+    "DOCKER_ENABLE_CI"                    = "true"
   }
 
   tags = var.tags
