@@ -4,6 +4,9 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# Install curl for healthcheck
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 # Use the .NET 8 SDK for building
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -27,13 +30,16 @@ RUN dotnet publish "./AppConfigDemo.csproj" -c $BUILD_CONFIGURATION -o /app/publ
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+COPY start.sh .
 
 # Create a non-root user for security
 RUN adduser --disabled-password --gecos '' appuser && chown -R appuser /app
+RUN chmod +x start.sh
 USER appuser
 
 # Set environment variables for ASP.NET Core
-ENV ASPNETCORE_URLS=http://+:8080
 ENV ASPNETCORE_ENVIRONMENT=Production
 
-ENTRYPOINT ["dotnet", "AppConfigDemo.dll"]
+RUN ls -la /app
+
+ENTRYPOINT ["./start.sh"]

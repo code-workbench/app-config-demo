@@ -24,7 +24,7 @@ if [ $? -eq 0 ]; then
     echo "🚀 Starting application..."
     echo "   Press Ctrl+C to stop"
     echo ""
-    dotnet run --urls="http://localhost:5000"
+    dotnet run --urls="http://localhost:8080"
 else
     echo "❌ Build failed!"
     exit 1
