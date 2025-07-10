@@ -60,7 +60,6 @@ bld/
 
 # Visual Studio files
 .vs/
-*.vscode/
 
 # JetBrains Rider
 .idea/

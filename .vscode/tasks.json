@@ -1,0 +1,255 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Terraform: Init",
+      "type": "shell",
+      "command": "terraform",
+      "args": [
+        "init"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/infra"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Terraform: Validate",
+      "type": "shell",
+      "command": "terraform",
+      "args": [
+        "validate"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/infra"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Terraform: Plan",
+      "type": "shell",
+      "command": "terraform",
+      "args": [
+        "plan",
+        "-var-file=./terraform.tfvars.environment",
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/infra"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Terraform: Apply",
+      "type": "shell",
+      "command": "terraform",
+      "args": [
+        "apply",
+        "-var-file=./terraform.tfvars.environment",
+        "-auto-approve"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/infra"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Terraform: Destroy",
+      "type": "shell",
+      "command": "terraform",
+      "args": [
+        "destroy",
+        "-var-file=./terraform.tfvars.environment",
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/infra"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Terraform: Format",
+      "type": "shell",
+      "command": "terraform",
+      "args": [
+        "fmt",
+        "-recursive"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/infra"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: Build App",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "build",
+        "-t",
+        "app-config-demo",
+        "./app"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/app"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: Run App Locally",
+      "type": "shell",
+      "command": "docker",
+      "args": [
+        "run",
+        "-p",
+        "8080:80",
+        "--name",
+        "app-config-demo-local",
+        "--rm",
+        "app-config-demo"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}/app"
+      },
+      "group": "test",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": [],
+      "isBackground": true
+    },
+    {
+      "label": "Azure: Login",
+      "type": "shell",
+      "command": "az",
+      "args": [
+        "login"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Azure: Show Account",
+      "type": "shell",
+      "command": "az",
+      "args": [
+        "account",
+        "show"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Build and Deploy: Full Pipeline",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Terraform: Plan",
+        "Docker: Build App"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": false,
+        "panel": "shared"
+      }
+    },
+    {
+      "label": "Docker: Tag and Push to ACR",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-c",
+        "echo 'Enter the ACR registry name (e.g., myregistry.azurecr.io):' && read ACR_REGISTRY && echo 'Enter the image tag (e.g., v1.0.0 or latest):' && read IMAGE_TAG && echo 'Tagging image for ACR...' && docker tag app-config-demo $ACR_REGISTRY/app-config-demo:$IMAGE_TAG && echo 'Logging into Azure Container Registry...' && az acr login --name ${ACR_REGISTRY%.*} && echo 'Pushing image to ACR...' && docker push $ACR_REGISTRY/app-config-demo:$IMAGE_TAG && echo 'Image successfully pushed to $ACR_REGISTRY/app-config-demo:$IMAGE_TAG'"
+      ],
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Docker: Build and Push to ACR (Full Pipeline)",
+      "dependsOrder": "sequence",
+      "dependsOn": [
+        "Docker: Build App",
+        "Docker: Tag and Push to ACR"
+      ],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "always",
+        "focus": true,
+        "panel": "shared"
+      }
+    }
+  ]
+}

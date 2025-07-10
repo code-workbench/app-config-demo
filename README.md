@@ -79,9 +79,9 @@ az account set --subscription "your-subscription-id"
 
 ### 3. Create a tfvars file
 
-You can go to the "./infra" directory and find an example of a tfvar file named "terraform.tfvars.example":
+You can go to the "./infra" directory and find an example of a tfvar file named "environment.tfvars":
 
-Create a copy of this file and update to have the appropriate values for your environment.  
+Update this to have the configuration for your environment.  
 
 ### 4. Deploy Infrastructure
 
@@ -93,10 +93,10 @@ cd ./infra
 terraform init
 
 # Plan deployment
-terraform plan -var-file={path to tfvars}
+terraform plan -var-file=./environment.tfvars
 
 # Apply infrastructure
-terraform apply -var-file={path to tfvars}
+terraform apply -var-file=./environment.tfvars
 ```
 
 ### 5. Build and Deploy Your App

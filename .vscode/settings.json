@@ -1,0 +1,48 @@
+{
+  "terraform.languageServer.enable": true,
+  "terraform.experimentalFeatures.validateOnSave": true,
+  "terraform.experimentalFeatures.prefillRequiredFields": true,
+  "files.associations": {
+    "*.tf": "terraform",
+    "*.tfvars": "terraform",
+    "*.hcl": "terraform"
+  },
+  "editor.formatOnSave": true,
+  "editor.formatOnPaste": true,
+  "editor.insertSpaces": true,
+  "editor.tabSize": 2,
+  "[terraform]": {
+    "editor.defaultFormatter": "hashicorp.terraform",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.formatDocument": "explicit"
+    }
+  },
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features"
+  },
+  "[yaml]": {
+    "editor.tabSize": 2
+  },
+  "[dockerfile]": {
+    "editor.tabSize": 2
+  },
+  "files.exclude": {
+    "**/.terraform": true,
+    "**/.terraform.lock.hcl": false,
+    "**/terraform.tfstate": true,
+    "**/terraform.tfstate.backup": true,
+    "**/.terraformrc": true,
+    "**/terraform.rc": true
+  },
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": {
+    "*.tf": "${capture}.tfvars, ${capture}.auto.tfvars",
+    "main.tf": "variables.tf, outputs.tf, terraform.tfvars.example, versions.tf, providers.tf",
+    "docker-compose.yml": "docker-compose.*.yml, .dockerignore",
+    "Dockerfile": ".dockerignore, docker-compose*.yml"
+  },
+  "terminal.integrated.cwd": "${workspaceFolder}",
+  "git.ignoreLimitWarning": true,
+  "azureTerraform.terminal": "integrated"
+}
